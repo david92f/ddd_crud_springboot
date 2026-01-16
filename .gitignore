@@ -1,0 +1,61 @@
+# Git ignore para proyecto Java/Maven + IDEs comunes
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Maven
+/target/
+dependency-reduced-pom.xml
+release.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+buildNumber.properties
+.mvn/timing.properties
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+*.iws
+/out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+/bin/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*.lock
+
+# Misc
+logs/
+node_modules/
+
+# Ignore build outputs and generated files
+/generated/
+
+# Ignore IDE-specific files
+
+# Keep mvnw scripts tracked if present (no ignore)
+# If you want to ignore wrapper folder content, uncomment:
+# /.mvn/wrapper/
