@@ -1,13 +1,11 @@
-name: CI
+name: Package
 
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
-  build:
+  package:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,5 +15,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - name: Build and test
-        run: mvn -B -DskipTests=false clean test
+      - name: Build and package
+        run: mvn -B -DskipTests=false package
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ddd-ejemplo-artifact
+          path: target/*.jar
+

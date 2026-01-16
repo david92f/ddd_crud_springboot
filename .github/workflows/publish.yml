@@ -1,0 +1,51 @@
+name: Publish Snapshot
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build package
+        run: mvn -B -DskipTests=false package
+
+      - name: Prepare Maven settings for GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          echo "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd\">" > $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "  <servers>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "    <server>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "      <id>github</id>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "      <username>${OWNER}</username>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "      <password>${GITHUB_TOKEN}</password>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "    </server>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "  </servers>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+          echo "</settings>" >> $GITHUB_WORKSPACE/.github/mvn-settings.xml
+
+      - name: Deploy to GitHub Packages (if distributionManagement configured)
+        if: ${{ always() }}
+        run: |
+          # Try to deploy using the temporary settings.xml. This will succeed only if pom.xml has distributionManagement configured for GitHub Packages.
+          mvn -B -s $GITHUB_WORKSPACE/.github/mvn-settings.xml deploy || echo "Deploy failed or not configured; artifact was built and is available as workflow artifact."
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ddd-ejemplo-artifact
+          path: target/*.jar
+

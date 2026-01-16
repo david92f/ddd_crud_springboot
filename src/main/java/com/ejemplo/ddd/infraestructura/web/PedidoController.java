@@ -13,11 +13,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PedidoController.class);
 
     private final PedidoAplicacionService pedidoAplicacionService;
 
@@ -34,9 +38,8 @@ public class PedidoController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
-            // Loggear el error: e.printStackTrace();
-            System.err.println("Error interno al crear el pedido: " + e.getMessage());
-            e.printStackTrace();
+            // Loggear el error de forma apropiada
+            logger.error("Error interno al crear el pedido: {}", e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno al crear el pedido.");
         }
     }
