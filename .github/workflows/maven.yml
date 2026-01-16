@@ -1,0 +1,22 @@
+name: CI
+      run: mvn -B -DskipTests=false clean test
+    - name: Build and test
+        distribution: 'temurin'
+        java-version: '21'
+      with:
+      uses: actions/setup-java@v4
+    - name: Set up JDK 21
+    - uses: actions/checkout@v4
+    steps:
+
+    runs-on: ubuntu-latest
+  build:
+jobs:
+
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  push:
+on:
+
+
