@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Currency; // Importar Currency
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Servicio de Dominio para orquestar la creación de un Pedido.
  * Puede contener lógica que no pertenece naturalmente al Agregado Pedido,
@@ -20,6 +23,8 @@ import java.util.Currency; // Importar Currency
  */
 @Service
 public class ServicioRealizacionPedido {
+
+    private static final Logger logger = LoggerFactory.getLogger(ServicioRealizacionPedido.class);
 
     private final PedidoRepository pedidoRepository;
 
@@ -46,28 +51,38 @@ public class ServicioRealizacionPedido {
             throw new IllegalArgumentException("Un pedido debe tener al menos una línea");
         }
 
-        // 1. Crear el objeto Pedido (Raíz del Agregado)
-        Pedido nuevoPedido = Pedido.crearNuevoPedido(idCliente, direccionEnvio, moneda);
+        logger.info("Iniciando creación de pedido para cliente '{}' con {} líneas y moneda {}", idCliente, lineas.size(), moneda);
 
-        // 2. Lógica de dominio que podría involucrar a otros agregados (ej. verificar stock)
-        // En este ejemplo la verificación de stock y coordinación con otros agregados
-        // queda fuera del servicio por simplicidad. Si se necesitase, se inyectaría
-        // el repositorio correspondiente y se implementaría la lógica aquí.
+        try {
+            // 1. Crear el objeto Pedido (Raíz del Agregado)
+            Pedido nuevoPedido = Pedido.crearNuevoPedido(idCliente, direccionEnvio, moneda);
 
-        // 3. Agregar las líneas al pedido. Las validaciones y el recálculo del total
-        // están encapsulados dentro del Agregado Pedido.
-        for (InfoLineaPedido infoLinea : lineas) {
-            // Asumimos que el precio viene dado y es en la moneda del pedido.
-            // En un sistema real, el precio podría obtenerse del catálogo de productos.
-            Dinero precio = new Dinero(infoLinea.precioUnitario(), moneda);
-            nuevoPedido.agregarLineaPedido(infoLinea.idProducto(), infoLinea.cantidad(), precio);
+            // 2. Lógica de dominio que podría involucrar a otros agregados (ej. verificar stock)
+            // En este ejemplo la verificación de stock y coordinación con otros agregados
+            // queda fuera del servicio por simplicidad. Si se necesitase, se inyectaría
+            // el repositorio correspondiente y se implementaría la lógica aquí.
+
+            // 3. Agregar las líneas al pedido. Las validaciones y el recálculo del total
+            // están encapsulados dentro del Agregado Pedido.
+            for (InfoLineaPedido infoLinea : lineas) {
+                // Asumimos que el precio viene dado y es en la moneda del pedido.
+                // En un sistema real, el precio podría obtenerse del catálogo de productos.
+                Dinero precio = new Dinero(infoLinea.precioUnitario(), moneda);
+                logger.debug("Añadiendo línea: producto={}, cantidad={}, precio={}", infoLinea.idProducto(), infoLinea.cantidad(), infoLinea.precioUnitario());
+                nuevoPedido.agregarLineaPedido(infoLinea.idProducto(), infoLinea.cantidad(), precio);
+            }
+            // El total se recalcula dentro de agregarLineaPedido.
+
+            // 4. Guardar el Agregado a través del Repositorio
+            pedidoRepository.guardar(nuevoPedido);
+
+            logger.info("Pedido creado y guardado: id={} total={}", nuevoPedido.getId().valor(), nuevoPedido.getTotalPedido().cantidad());
+
+            return nuevoPedido;
+        } catch (RuntimeException e) {
+            logger.error("Error al crear el pedido para cliente {}: {}", idCliente, e.getMessage(), e);
+            throw e;
         }
-        // El total se recalcula dentro de agregarLineaPedido.
-
-        // 4. Guardar el Agregado a través del Repositorio
-        pedidoRepository.guardar(nuevoPedido);
-
-        return nuevoPedido;
     }
 
     /**

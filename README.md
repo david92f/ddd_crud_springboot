@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/david92f/ddd_crud_springboot/actions/workflows/maven.yml/badge.svg)](https://github.com/david92f/ddd_crud_springboot/actions)
 [![Package](https://github.com/david92f/ddd_crud_springboot/actions/workflows/package.yml/badge.svg)](https://github.com/david92f/ddd_crud_springboot/actions)
+[![Publish](https://github.com/david92f/ddd_crud_springboot/actions/workflows/publish.yml/badge.svg)](https://github.com/david92f/ddd_crud_springboot/actions)
 
 Proyecto de ejemplo DDD (Domain-Driven Design) en Java con Spring Boot.
 

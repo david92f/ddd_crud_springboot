@@ -14,10 +14,15 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version> <relativePath/> </parent>
+        <version>3.1.5</version>
+        <relativePath/>
+    </parent>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
+        <micrometer.version>1.11.5</micrometer.version>
+        <swagger.core.version>2.2.10</swagger.core.version>
+        <springdoc.version>2.1.0</springdoc.version>
     </properties>
 
     <dependencies>
@@ -34,7 +39,7 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-<dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -48,6 +53,37 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Actuator & Micrometer (nativo) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+        <!-- micrometer-core explicit version -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+
+        <!-- OpenAPI / springdoc (nativo) -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+        <!-- ensure swagger models available -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>${swagger.core.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -66,4 +102,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/david92f/ddd_crud_springboot</url>
+        </repository>
+    </distributionManagement>
 </project>
