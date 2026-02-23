@@ -5,12 +5,13 @@ import com.ejemplo.ddd.dominio.modelo.pedido.Pedido;
 import com.ejemplo.ddd.dominio.repositorio.PedidoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementación en memoria del Repositorio de Pedidos para fines de demostración.
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
  */
 @Repository
 public class PedidoRepositoryImpl implements PedidoRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(PedidoRepositoryImpl.class);
 
     private final Map<IdentificadorPedido, Pedido> almacenDePedidos = new ConcurrentHashMap<>();
 
@@ -29,7 +32,7 @@ public class PedidoRepositoryImpl implements PedidoRepository {
         // Esta clonación es MUY simplificada.
         Pedido copiaParaAlmacen = clonarPedido(pedido);
         almacenDePedidos.put(pedido.getId(), copiaParaAlmacen);
-        System.out.println("INFO: Pedido guardado/actualizado en memoria: " + pedido.getId().valor());
+        logger.info("Pedido guardado/actualizado en memoria: {}", pedido.getId().valor());
     }
 
     @Override
@@ -42,17 +45,17 @@ public class PedidoRepositoryImpl implements PedidoRepository {
     @Override
     public List<Pedido> buscarTodos() {
         return almacenDePedidos.values().stream()
-                               .map(this::clonarPedido) // Devolver copias
-                               .collect(Collectors.toList());
+                               .map(this::clonarPedido)
+                               .toList();
     }
 
     @Override
     public void eliminarPorId(IdentificadorPedido id) {
         Pedido removido = almacenDePedidos.remove(id);
         if (removido != null) {
-            System.out.println("INFO: Pedido eliminado de memoria: " + id.valor());
+            logger.info("Pedido eliminado de memoria: {}", id.valor());
         } else {
-            System.out.println("WARN: Intento de eliminar pedido no existente en memoria: " + id.valor());
+            logger.warn("Intento de eliminar pedido no existente en memoria: {}", id.valor());
         }
     }
 
@@ -86,7 +89,7 @@ public class PedidoRepositoryImpl implements PedidoRepository {
                         lp.getPrecioUnitario().moneda()
                     )
                 ))
-                .collect(Collectors.toList()),
+                .collect(java.util.stream.Collectors.toList()),
             new com.ejemplo.ddd.dominio.modelo.pedido.Dinero( // Asegurar nueva instancia de VO
                 original.getTotalPedido().cantidad(),
                 original.getTotalPedido().moneda()

@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,7 @@ public class PedidoAplicacionService {
                 l.cantidad(),
                 l.precioUnitario()
             ))
-            .collect(Collectors.toList());
+            .toList();
         
         Currency moneda;
         try {
@@ -85,7 +84,7 @@ public class PedidoAplicacionService {
         logger.debug("Obtener todos los pedidos");
         return pedidoRepository.buscarTodos().stream()
                                .map(this::convertirAPedidoDTO)
-                               .collect(Collectors.toList());
+                               .toList();
     }
 
     // --- UPDATE ---
@@ -209,7 +208,7 @@ public class PedidoAplicacionService {
                 lp.getPrecioUnitario().moneda().getCurrencyCode(),
                 lp.calcularSubtotal().cantidad()
             ))
-            .collect(Collectors.toList());
+            .toList();
 
         return new PedidoDTO(
             pedido.getId().valor(),
