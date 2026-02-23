@@ -10,18 +10,11 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
-
-    private static final Logger logger = LoggerFactory.getLogger(PedidoController.class);
 
     private final PedidoAplicacionService pedidoAplicacionService;
 
@@ -32,37 +25,22 @@ public class PedidoController {
     // --- CREATE ---
     @PostMapping
     public ResponseEntity<PedidoDTO> crearPedido(@Valid @RequestBody CrearPedidoRequest request) {
-        try {
-            PedidoDTO nuevoPedidoDTO = pedidoAplicacionService.gestionarCreacionPedido(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedidoDTO);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Exception e) {
-            // Loggear el error de forma apropiada
-            logger.error("Error interno al crear el pedido: {}", e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno al crear el pedido.");
-        }
+        PedidoDTO nuevoPedidoDTO = pedidoAplicacionService.gestionarCreacionPedido(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedidoDTO);
     }
 
     // --- READ ---
     @GetMapping("/{idPedido}")
     public ResponseEntity<PedidoDTO> obtenerPedidoPorId(@PathVariable String idPedido) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            return pedidoAplicacionService.obtenerPedidoPorId(identificador)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new PedidoNoEncontradoException("Pedido no encontrado con ID: " + idPedido));
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException e) { // Para UUID inválido
-             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return pedidoAplicacionService.obtenerPedidoPorId(identificador)
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new PedidoNoEncontradoException("Pedido no encontrado con ID: " + idPedido));
     }
 
     @GetMapping
     public ResponseEntity<List<PedidoDTO>> obtenerTodosLosPedidos() {
-        List<PedidoDTO> pedidos = pedidoAplicacionService.obtenerTodosLosPedidos();
-        return ResponseEntity.ok(pedidos);
+        return ResponseEntity.ok(pedidoAplicacionService.obtenerTodosLosPedidos());
     }
 
     // --- UPDATE ---
@@ -70,46 +48,25 @@ public class PedidoController {
     public ResponseEntity<PedidoDTO> actualizarDireccionEnvio(
             @PathVariable String idPedido,
             @Valid @RequestBody ActualizarDireccionRequest request) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.actualizarDireccionEnvio(identificador, request);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) { // Errores de dominio o UUID inválido
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return ResponseEntity.ok(pedidoAplicacionService.actualizarDireccionEnvio(identificador, request));
     }
     
     @PostMapping("/{idPedido}/lineas")
     public ResponseEntity<PedidoDTO> agregarLineaAPedido(
             @PathVariable String idPedido,
             @Valid @RequestBody AgregarLineaRequest request) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.agregarLineaAPedido(identificador, request);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return ResponseEntity.ok(pedidoAplicacionService.agregarLineaAPedido(identificador, request));
     }
 
     @DeleteMapping("/{idPedido}/lineas/{idProducto}")
     public ResponseEntity<PedidoDTO> eliminarLineaDePedido(
             @PathVariable String idPedido,
             @PathVariable String idProducto) {
-        try {
-            IdentificadorPedido idP = IdentificadorPedido.deString(idPedido);
-            IdentificadorProducto idProd = IdentificadorProducto.deString(idProducto);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.eliminarLineaDePedido(idP, idProd);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) { // Error de dominio, UUID inválido o línea no encontrada
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido idP = IdentificadorPedido.deString(idPedido);
+        IdentificadorProducto idProd = IdentificadorProducto.deString(idProducto);
+        return ResponseEntity.ok(pedidoAplicacionService.eliminarLineaDePedido(idP, idProd));
     }
 
     @PutMapping("/{idPedido}/lineas/{idProducto}/cantidad")
@@ -117,83 +74,42 @@ public class PedidoController {
             @PathVariable String idPedido,
             @PathVariable String idProducto,
             @Valid @RequestBody ActualizarCantidadLineaRequest request) {
-        try {
-            IdentificadorPedido idP = IdentificadorPedido.deString(idPedido);
-            IdentificadorProducto idProd = IdentificadorProducto.deString(idProducto);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.actualizarCantidadLinea(idP, idProd, request);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido idP = IdentificadorPedido.deString(idPedido);
+        IdentificadorProducto idProd = IdentificadorProducto.deString(idProducto);
+        return ResponseEntity.ok(pedidoAplicacionService.actualizarCantidadLinea(idP, idProd, request));
     }
 
     @PostMapping("/{idPedido}/confirmar")
     public ResponseEntity<PedidoDTO> confirmarPedido(@PathVariable String idPedido) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.confirmarPedido(identificador);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return ResponseEntity.ok(pedidoAplicacionService.confirmarPedido(identificador));
     }
     
     @PostMapping("/{idPedido}/enviar")
     public ResponseEntity<PedidoDTO> marcarPedidoComoEnviado(@PathVariable String idPedido) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.marcarPedidoComoEnviado(identificador);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return ResponseEntity.ok(pedidoAplicacionService.marcarPedidoComoEnviado(identificador));
     }
 
     @PostMapping("/{idPedido}/entregar")
     public ResponseEntity<PedidoDTO> marcarPedidoComoEntregado(@PathVariable String idPedido) {
-         try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.marcarPedidoComoEntregado(identificador);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return ResponseEntity.ok(pedidoAplicacionService.marcarPedidoComoEntregado(identificador));
     }
     
     @PostMapping("/{idPedido}/cancelar")
     public ResponseEntity<PedidoDTO> cancelarPedido(
             @PathVariable String idPedido,
             @Valid @RequestBody CancelarPedidoRequest request) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            PedidoDTO pedidoActualizado = pedidoAplicacionService.cancelarPedido(identificador, request);
-            return ResponseEntity.ok(pedidoActualizado);
-        } catch (PedidoNoEncontradoException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        return ResponseEntity.ok(pedidoAplicacionService.cancelarPedido(identificador, request));
     }
 
     // --- DELETE ---
     @DeleteMapping("/{idPedido}")
     public ResponseEntity<Void> eliminarPedido(@PathVariable String idPedido) {
-        try {
-            IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
-            pedidoAplicacionService.eliminarPedido(identificador);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) { // Para UUID inválido
-             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-        // No se lanza NOT_FOUND aquí si el servicio de aplicación no lo hace,
-        // ya que DELETE es idempotente.
+        IdentificadorPedido identificador = IdentificadorPedido.deString(idPedido);
+        pedidoAplicacionService.eliminarPedido(identificador);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -10,6 +10,7 @@ Resumen
 
 - Lenguaje: Java 21
 - Build: Maven
+- CI/CD: GitHub Actions configurado para build y tests automáticos en pull requests y push a main/master.
 - Objetivo: ejemplo CRUD y modelado por agregados/servicios de dominio
 
 Cómo ejecutar localmente
@@ -20,7 +21,7 @@ Cómo ejecutar localmente
 mvn -B clean test
 ```
 
-2. Compilar y ejecutar la aplicación (si la aplicación tiene un main):
+1. Compilar y ejecutar la aplicación (si la aplicación tiene un main):
 
 ```bash
 mvn -B package
@@ -50,6 +51,7 @@ API — Endpoints (detallado)
 Base path: `/api/pedidos`
 
 1) Crear pedido
+
 - POST /api/pedidos
 - Content-Type: application/json
 - Body (ejemplo):
@@ -76,14 +78,16 @@ Base path: `/api/pedidos`
 
 ```json
 {
-  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "estado": "CREADO",
-  "total": 26.00,
+  "idPedido": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "idCliente": "cliente-123",
+  "estado": "PENDIENTE",
+  "totalPedido": 26.00,
   "moneda": "EUR"
 }
 ```
 
-2) Agregar línea a pedido
+1) Agregar línea a pedido
+
 - POST /api/pedidos/{idPedido}/lineas
 - Body (ejemplo):
 
@@ -91,7 +95,8 @@ Base path: `/api/pedidos`
 { "idProducto": "producto-3", "cantidad": 1, "precioUnitario": 12.00 }
 ```
 
-3) Actualizar dirección
+1) Actualizar dirección
+
 - PUT /api/pedidos/{idPedido}/direccion
 - Body (ejemplo):
 
@@ -99,18 +104,19 @@ Base path: `/api/pedidos`
 { "calle": "Calle Nueva 5", "ciudad": "Ciudad", "codigoPostal": "28001" }
 ```
 
-4) Obtener pedido por ID
+1) Obtener pedido por ID
+
 - GET /api/pedidos/{idPedido}
 - Response 200 (ejemplo):
 
 ```json
 {
-  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "idPedido": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
   "idCliente": "cliente-123",
-  "direccion": { "calle": "Calle Nueva 5", "ciudad": "Ciudad", "codigoPostal": "28001" },
-  "lineas": [ { "idProducto": "producto-1", "cantidad": 2, "precioUnitario": 10.50 } ],
-  "total": 21.00,
-  "estado": "CONFIRMADO"
+  "direccionEnvio": { "calle": "Calle Nueva 5", "ciudad": "Ciudad", "codigoPostal": "28001" },
+  "lineasPedido": [ { "idProducto": "producto-1", "cantidad": 2, "precioUnitario": 10.50 } ],
+  "totalPedido": 21.00,
+  "estado": "PROCESANDO"
 }
 ```
 
